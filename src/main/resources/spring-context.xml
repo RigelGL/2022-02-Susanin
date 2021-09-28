@@ -4,19 +4,24 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="personDao" class="ru.otus.spring.dao.PersonDaoSimple">
-        <property name="defaultAge" value="28"/>
-    </bean>
+    <bean id="personDao" class="ru.otus.spring.dao.PersonDaoSimple"/>
 
     <bean id="personService" class="ru.otus.spring.service.PersonServiceImpl">
-        <property name="dao" ref="personDao"/>
+        <constructor-arg name="dao" ref="personDao"/>
     </bean>
 
     <bean id="questionDao" class="ru.otus.spring.dao.QuestionDaoSimple">
         <constructor-arg name="resource" value="classpath:questions.csv"/>
+        <constructor-arg name="ioService" ref="ioService"/>
     </bean>
 
     <bean id="questionService" class="ru.otus.spring.service.QuestionServiceImpl">
         <constructor-arg name="dao" ref="questionDao"/>
+    </bean>
+
+    <bean id="ioService" class="ru.otus.spring.service.IOServiceImpl"/>
+
+    <bean id="quizService" class="ru.otus.spring.service.QuizServiceImpl">
+        <constructor-arg name="ioService" ref="ioService"/>
     </bean>
 </beans>
