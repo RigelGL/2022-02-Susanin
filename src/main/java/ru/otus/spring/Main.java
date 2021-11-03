@@ -1,4 +1,4 @@
-package main.java.ru.otus.spring;
+package ru.otus.spring;
 
 
 public class Main {
