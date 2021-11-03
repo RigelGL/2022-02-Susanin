@@ -2,6 +2,7 @@ package ru.otus.spring.service;
 
 import java.io.BufferedReader;
 
+
 public interface IOService {
     BufferedReader getReader();
 

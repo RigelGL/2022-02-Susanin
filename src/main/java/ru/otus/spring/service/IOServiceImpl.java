@@ -1,11 +1,13 @@
 package ru.otus.spring.service;
 
-import javax.security.auth.kerberos.KerberosTicket;
+import org.springframework.stereotype.Service;
+
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
+
+@Service
 public class IOServiceImpl implements IOService {
     private final BufferedReader reader;
     private final PrintStream printStream;

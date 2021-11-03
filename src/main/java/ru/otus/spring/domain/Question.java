@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 public class Question {
     @CsvBindByName(column = "question")
     private String question;
@@ -42,6 +43,6 @@ public class Question {
 
     @Override
     public String toString() {
-        return "Question {ask: " + getQuestion() + ", answers: " +  getAnswers() + ", rightAnswer: " + getRightAnswer() + "}";
+        return "Question {ask: " + getQuestion() + ", answers: " + getAnswers() + ", rightAnswer: " + getRightAnswer() + "}";
     }
 }

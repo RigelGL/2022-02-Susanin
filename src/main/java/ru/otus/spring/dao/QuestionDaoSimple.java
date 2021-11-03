@@ -1,20 +1,23 @@
 package ru.otus.spring.dao;
 
 import com.opencsv.bean.CsvToBeanBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Repository;
 import ru.otus.spring.domain.Question;
 import ru.otus.spring.service.IOService;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.InputStreamReader;
 import java.util.List;
 
+
+@Repository("questionDao")
 public class QuestionDaoSimple implements QuestionDao {
 
     private final Resource resource;
     private final IOService ioService;
 
-    public QuestionDaoSimple(Resource resource, IOService ioService) {
+    public QuestionDaoSimple(@Value("${questions.url}") Resource resource, IOService ioService) {
         this.resource = resource;
         this.ioService = ioService;
     }
