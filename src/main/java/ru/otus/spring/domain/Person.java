@@ -2,6 +2,7 @@ package ru.otus.spring.domain;
 
 
 public class Person {
+
     private final String name;
 
     public Person(String name) {

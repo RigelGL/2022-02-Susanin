@@ -9,11 +9,14 @@ import java.util.List;
 
 
 public class Question {
+
     @CsvBindByName(column = "question")
     private String question;
+
     @CsvBindAndSplitByName(column = "answers", splitOn = ";", elementType = String.class)
     private List<String> answers;
 
+    private String rightAnswer;
 
     public String getQuestion() {
         return question;
@@ -29,6 +32,12 @@ public class Question {
 
     public void setAnswers(List<String> answers) {
         this.answers = answers;
+        if(answers != null && answers.size() > 0) {
+            rightAnswer = answers.get(0);
+        }
+        else {
+            rightAnswer = "null";
+        }
     }
 
     public List<String> getShuffledAnswers() {
@@ -38,7 +47,7 @@ public class Question {
     }
 
     public String getRightAnswer() {
-        return answers != null && answers.size() > 0 ? answers.get(0) : "";
+        return rightAnswer;
     }
 
     @Override
