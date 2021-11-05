@@ -20,11 +20,8 @@ public class Main {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Main.class);
 
-        PersonService personService = context.getBean(PersonService.class);
-        QuestionService questionService = context.getBean(QuestionService.class);
-
         QuizService quizService = context.getBean(QuizService.class);
 
-        quizService.execute(personService, questionService);
+        quizService.execute();
     }
 }

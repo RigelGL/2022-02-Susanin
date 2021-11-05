@@ -7,6 +7,5 @@ import java.util.List;
 
 public interface QuestionDao {
 
-    List<Question> getAllQuestions();
-
+    List<Question> getAllQuestions() throws Exception;
 }
