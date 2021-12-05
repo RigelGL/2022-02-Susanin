@@ -2,10 +2,10 @@ package ru.otus.spring.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.otus.spring.dao.QuestionsReadingException;
 import ru.otus.spring.domain.Person;
 import ru.otus.spring.domain.Question;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,7 @@ public class QuizServiceImpl implements QuizService {
     private final PersonService personService;
     private final QuestionService questionService;
 
-    private int minimumForTest;
+    private final int minimumForTest;
 
 
     public QuizServiceImpl(IOService ioService, PersonService personService, QuestionService questionService,
@@ -31,7 +31,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
-    private Person getUser() {
+    private Person getPerson() {
         ioService.println("Enter your name:");
 
         String name = ioService.readNotBlankLine();
@@ -46,9 +46,9 @@ public class QuizServiceImpl implements QuizService {
             List<Question> shuffledQuestions = new ArrayList<>(result);
             Collections.shuffle(shuffledQuestions);
             return result;
-        } catch(Exception e) {
+        } catch(QuestionsReadingException e) {
 
-            if(e instanceof FileNotFoundException) {
+            if(e.getType() == QuestionsReadingException.QuestionsReadingExceptionType.FileNotFound) {
                 ioService.printError("Questions file not found");
                 ioService.printError(e.toString());
             }
@@ -60,32 +60,37 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
+    private boolean askQuestion(Question question) {
+        String shuffledAnswers = String.join(", ", question.getShuffledAnswers());
+        ioService.printFormatted("%s %s", question.getQuestion(), shuffledAnswers);
+
+        boolean oneOfAnswer;
+        String answer;
+
+        do {
+            answer = ioService.readNotBlankLine().toLowerCase();
+            String finalAnswer = answer;
+            oneOfAnswer = question.getAnswers().stream().anyMatch(s -> s.toLowerCase().equals(finalAnswer));
+
+            if(!oneOfAnswer) {
+                ioService.printFormatted("Incorrect variant. Type one of: %s", shuffledAnswers);
+            }
+
+        } while(!oneOfAnswer);
+
+        return answer.equals(question.getRightAnswer());
+    }
+
     private int testUser(Person user, List<Question> questions) {
         ioService.printFormatted("Hello, %s, complete the following phrases with one of the suggested options:", user.getName());
 
         int rightAnswers = 0;
 
         for(Question q : questions) {
-            String shuffledAnswers = String.join(", ", q.getShuffledAnswers());
-            ioService.printFormatted("%s %s", q.getQuestion(), shuffledAnswers);
+            boolean isRightAnswer = askQuestion(q);
 
-            boolean oneOfAnswer;
-            String answer;
-
-            do {
-                answer = ioService.readNotBlankLine().toLowerCase();
-                String finalAnswer = answer;
-                oneOfAnswer = q.getAnswers().stream().anyMatch(s -> s.toLowerCase().equals(finalAnswer));
-
-                if(!oneOfAnswer) {
-                    ioService.printFormatted("Incorrect variant. Type one of %s", shuffledAnswers);
-                }
-
-            } while(!oneOfAnswer);
-
-            if(answer.equals(q.getRightAnswer())) {
+            if(isRightAnswer)
                 rightAnswers += 1;
-            }
         }
 
         return rightAnswers;
@@ -117,7 +122,7 @@ public class QuizServiceImpl implements QuizService {
             return;
         }
 
-        Person user = getUser();
+        Person user = getPerson();
 
         int rightAnswers = testUser(user, questions);
 

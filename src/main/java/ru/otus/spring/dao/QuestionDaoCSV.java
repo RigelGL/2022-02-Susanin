@@ -6,7 +6,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 import ru.otus.spring.domain.Question;
 
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -23,14 +22,17 @@ public class QuestionDaoCSV implements QuestionDao {
 
 
     @Override
-    public List<Question> getAllQuestions() throws Exception {
-        if(!resource.exists())
-            throw new FileNotFoundException(resource.getDescription());
+    public List<Question> getAllQuestions() throws QuestionsReadingException {
+        if(!resource.exists()) {
+            throw new QuestionsReadingException("file not found: " + resource.getDescription(),
+                    QuestionsReadingException.QuestionsReadingExceptionType.FileNotFound);
+        }
 
         try(InputStreamReader inputStreamReader = new InputStreamReader(resource.getInputStream())) {
             return new CsvToBeanBuilder<Question>(inputStreamReader).withType(Question.class).build().parse();
-        } catch(Throwable e) {
-            throw new RuntimeException("QuestionDaoSimple.getAllQuestions() error while reading questions resource:\n\t" + e.toString());
+        } catch(Exception e) {
+            throw new QuestionsReadingException("error while reading questions resource:\n\t" + e.toString(),
+                    QuestionsReadingException.QuestionsReadingExceptionType.ErrorWhileReading);
         }
     }
 }

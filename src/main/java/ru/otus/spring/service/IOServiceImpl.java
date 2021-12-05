@@ -19,7 +19,10 @@ public class IOServiceImpl implements IOService {
 
     private Locale locale;
 
-    public IOServiceImpl(InputStream inputStream, PrintStream outputStream, PrintStream errorStream, @Value("${user.region}") Locale locale) {
+    public IOServiceImpl(@Value("#{T(java.lang.System).in}") InputStream inputStream,
+                         @Value("#{T(java.lang.System).out}") PrintStream outputStream,
+                         @Value("#{T(java.lang.System).err}") PrintStream errorStream,
+                         @Value("${user.region}") Locale locale) {
         this.outputStream = outputStream;
         this.errorStream = errorStream;
         reader = new BufferedReader(new InputStreamReader(inputStream));
