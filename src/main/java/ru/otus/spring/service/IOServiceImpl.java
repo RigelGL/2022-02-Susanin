@@ -17,7 +17,7 @@ public class IOServiceImpl implements IOService {
     private final PrintStream outputStream;
     private final PrintStream errorStream;
 
-    private Locale locale;
+    private final Locale locale;
 
     public IOServiceImpl(@Value("#{T(java.lang.System).in}") InputStream inputStream,
                          @Value("#{T(java.lang.System).out}") PrintStream outputStream,

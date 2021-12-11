@@ -53,7 +53,7 @@ public class QuizServiceImpl implements QuizService {
                 ioService.printError(e.toString());
             }
             else {
-                ioService.printError(e.toString());
+                ioService.printError(e.getOriginal().toString());
             }
         }
         return new ArrayList<>();
@@ -89,8 +89,9 @@ public class QuizServiceImpl implements QuizService {
         for(Question q : questions) {
             boolean isRightAnswer = askQuestion(q);
 
-            if(isRightAnswer)
+            if(isRightAnswer) {
                 rightAnswers += 1;
+            }
         }
 
         return rightAnswers;
@@ -119,6 +120,7 @@ public class QuizServiceImpl implements QuizService {
         List<Question> questions = getShuffledQuestions();
 
         if(questions.size() == 0) {
+            ioService.println("Error: questions list is empty.");
             return;
         }
 

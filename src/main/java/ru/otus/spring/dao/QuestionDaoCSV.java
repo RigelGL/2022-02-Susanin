@@ -32,7 +32,7 @@ public class QuestionDaoCSV implements QuestionDao {
             return new CsvToBeanBuilder<Question>(inputStreamReader).withType(Question.class).build().parse();
         } catch(Exception e) {
             throw new QuestionsReadingException("error while reading questions resource:\n\t" + e.toString(),
-                    QuestionsReadingException.QuestionsReadingExceptionType.ErrorWhileReading);
+                    QuestionsReadingException.QuestionsReadingExceptionType.ErrorWhileReading, e);
         }
     }
 }
