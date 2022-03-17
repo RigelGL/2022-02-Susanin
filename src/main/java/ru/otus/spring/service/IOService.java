@@ -8,5 +8,9 @@ public interface IOService {
 
     void printFormatted(String string, Object... args);
 
+    void printLocalised(String code, Object... args);
+
     void printError(String error);
+
+    void printLocalisedError(String code, Object... args);
 }

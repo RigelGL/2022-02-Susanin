@@ -1,9 +1,9 @@
 package ru.otus.spring.dao;
 
 import com.opencsv.bean.CsvToBeanBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
+import ru.otus.spring.config.QuizConfig;
 import ru.otus.spring.domain.Question;
 
 import java.io.InputStreamReader;
@@ -16,8 +16,8 @@ public class QuestionDaoCSV implements QuestionDao {
     private final Resource resource;
 
 
-    public QuestionDaoCSV(@Value("${questions.url}") Resource resource) {
-        this.resource = resource;
+    public QuestionDaoCSV(QuizConfig config) {
+        this.resource = config.getQuestions();
     }
 
 
@@ -31,7 +31,7 @@ public class QuestionDaoCSV implements QuestionDao {
         try(InputStreamReader inputStreamReader = new InputStreamReader(resource.getInputStream())) {
             return new CsvToBeanBuilder<Question>(inputStreamReader).withType(Question.class).build().parse();
         } catch(Exception e) {
-            throw new QuestionsReadingException("error while reading questions resource:\n\t" + e.toString(),
+            throw new QuestionsReadingException("error while reading questions resource:\n\t" + e,
                     QuestionsReadingException.QuestionsReadingExceptionType.ErrorWhileReading, e);
         }
     }

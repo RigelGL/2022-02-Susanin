@@ -1,7 +1,7 @@
 package ru.otus.spring.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.otus.spring.config.QuizConfig;
 import ru.otus.spring.dao.QuestionsReadingException;
 import ru.otus.spring.domain.Person;
 import ru.otus.spring.domain.Question;
@@ -13,26 +13,27 @@ import java.util.List;
 
 @Service
 public class QuizServiceImpl implements QuizService {
-
     private final IOService ioService;
     private final PersonService personService;
     private final QuestionService questionService;
 
     private final int minimumForTest;
 
-
-    public QuizServiceImpl(IOService ioService, PersonService personService, QuestionService questionService,
-                           @Value("${questions.minimum-for-test}") int minimumForTest
+    public QuizServiceImpl(
+            IOService ioService,
+            PersonService personService,
+            QuestionService questionService,
+            QuizConfig quizConfig
     ) {
         this.ioService = ioService;
         this.personService = personService;
         this.questionService = questionService;
-        this.minimumForTest = minimumForTest;
+        this.minimumForTest = quizConfig.getMinimumForTest();
     }
 
 
     private Person getPerson() {
-        ioService.println("Enter your name:");
+        ioService.printLocalised("message.enter-your-name");
 
         String name = ioService.readNotBlankLine();
 
@@ -49,7 +50,7 @@ public class QuizServiceImpl implements QuizService {
         } catch(QuestionsReadingException e) {
 
             if(e.getType() == QuestionsReadingException.QuestionsReadingExceptionType.FileNotFound) {
-                ioService.printError("Questions file not found");
+                ioService.printLocalisedError("error.questions-file-not-found");
                 ioService.printError(e.toString());
             }
             else {
@@ -73,7 +74,7 @@ public class QuizServiceImpl implements QuizService {
             oneOfAnswer = question.getAnswers().stream().anyMatch(s -> s.toLowerCase().equals(finalAnswer));
 
             if(!oneOfAnswer) {
-                ioService.printFormatted("Incorrect variant. Type one of: %s", shuffledAnswers);
+                ioService.printLocalised("message.incorrect-answer", shuffledAnswers);
             }
 
         } while(!oneOfAnswer);
@@ -82,7 +83,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     private int testUser(Person user, List<Question> questions) {
-        ioService.printFormatted("Hello, %s, complete the following phrases with one of the suggested options:", user.getName());
+        ioService.printLocalised("message.hello", user.getName());
 
         int rightAnswers = 0;
 
@@ -99,18 +100,18 @@ public class QuizServiceImpl implements QuizService {
 
 
     private void printTestResult(Person user, int rightAnswers, int questionsCount) {
-        ioService.printFormatted("%s, your result is: %d correct answers out of %d", user.getName(), rightAnswers, questionsCount);
+        ioService.printLocalised("message.result", user.getName(), rightAnswers, questionsCount);
 
         if(rightAnswers >= minimumForTest) {
             if(rightAnswers == questionsCount) {
-                ioService.println("Very well! You passed the test for the highest score!");
+                ioService.printLocalised("message.best-result");
             }
             else {
-                ioService.println("You pass the test.");
+                ioService.printLocalised("message.success-result");
             }
         }
         else {
-            ioService.printFormatted("You did not pass the test! Нou need to answer at least %d questions correctly", minimumForTest);
+            ioService.printLocalised("message.failed-result", minimumForTest);
         }
     }
 
@@ -120,7 +121,7 @@ public class QuizServiceImpl implements QuizService {
         List<Question> questions = getShuffledQuestions();
 
         if(questions.size() == 0) {
-            ioService.println("Error: questions list is empty.");
+            ioService.printLocalisedError("error.question-list-is-empty");
             return;
         }
 
