@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.spring.domain.Author;
 import ru.otus.spring.domain.Book;
 import ru.otus.spring.domain.Genre;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,8 +45,13 @@ class BookDaoJdbcTest {
     public static final int INVALID_BOOK_ID = 5000;
 
 
+    private static final Random random = new Random(34895763);
+
     @Autowired
     private BookDaoJdbc dao;
+
+    @Autowired
+    private GenreDaoJdbc genreDaoJdbc;
 
     @DisplayName("Получение количества книг")
     @Test
@@ -109,5 +114,59 @@ class BookDaoJdbcTest {
 
         success = dao.update(new Book(INVALID_BOOK_ID, "new name", "new content", otherExpectedAuthor, new ArrayList<>()));
         assertThat(success).isEqualTo(false);
+    }
+
+    private String generateRandomString(int length) {
+        return random.ints(48, 123)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
+
+
+    @DisplayName("Тест на производительность")
+//    @Test
+    void performance() {
+        int booksCount = 1000;
+        int genresCount = 1000;
+        int genresPerBook = 7;
+
+        List<Genre> genres = new ArrayList<>();
+        for(int i = 0; i < genresCount; i++) {
+            genres.add(genreDaoJdbc.insert(new Genre(0, generateRandomString(10))));
+        }
+
+        dao.deleteById(EXPECTED_BOOK_ID);
+
+        List<Book> books = new ArrayList<>();
+
+        Author author = new Author(EXISTING_AUTHOR_ID, EXISTING_AUTHOR_NAME);
+
+        for(int i = 0; i < booksCount; i++) {
+            List<Genre> bookGenres = new ArrayList<>();
+            for(int j = 0; j < genresPerBook; j++) {
+                Genre genre = genres.get(random.nextInt(genres.size()));
+                if(bookGenres.contains(genre))
+                    continue;
+                bookGenres.add(genre);
+            }
+            books.add(dao.insert(new Book(0, generateRandomString(10), generateRandomString(100), author, bookGenres)));
+        }
+
+        long time = System.nanoTime();
+        List<Book> allBooks = dao.getAll();
+        time = System.nanoTime() - time;
+        System.out.println("TIME: " + (time / 1000) + " us");
+
+        for(Book book : allBooks) {
+            book.getGenres().sort(Comparator.comparing(Genre::getId));
+        }
+
+        for(Book book : books) {
+            book.getGenres().sort(Comparator.comparing(Genre::getId));
+        }
+
+        assertThat(allBooks).isEqualTo(books);
     }
 }

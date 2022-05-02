@@ -2,16 +2,15 @@ package ru.otus.spring.dao;
 
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.otus.spring.domain.Author;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,15 +36,13 @@ public class AuthorDaoJdbc implements AuthorDao {
     @Override
     public Author insert(Author authorTemplate) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("insert into author (name) values (?)", Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, authorTemplate.getName());
-            return ps;
-        }, keyHolder);
 
-        Long key = keyHolder.getKeyAs(Long.class);
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("name", authorTemplate.getName());
 
-        return key == null ? null : new Author(key, authorTemplate.getName());
+        namedJdbc.update("insert into author (name) values (:name)", params, keyHolder);
+
+        return new Author(keyHolder.getKey().longValue(), authorTemplate.getName());
     }
 
     @Override
